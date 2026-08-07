@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Access Key</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+                    },
+                    colors: {
+                        glass: {
+                            100: 'rgba(255, 255, 255, 0.1)',
+                            200: 'rgba(255, 255, 255, 0.2)',
+                            800: 'rgba(17, 24, 39, 0.4)',
+                            900: 'rgba(17, 24, 39, 0.7)',
+                        }
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'progress': 'progress 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        progress: {
+                            '0%': { width: 'var(--start-width, 0%)' },
+                            '100%': { width: 'var(--end-width, 100%)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .dark .glass-panel {
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .glass-button {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.2s ease;
+        }
+        
+        .glass-button:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .dark .glass-button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dark .glass-button:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(75, 85, 99, 0.5);
+        }
+        
+        .toast-enter {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        .toast-enter-active {
+            transform: translateX(0);
+            opacity: 1;
+            transition: all 0.3s ease-out;
+        }
+        .toast-exit {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .toast-exit-active {
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease-in;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-gray-900 dark:text-gray-100 min-h-screen relative flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8">
+
+    <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-300 dark:bg-purple-900 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-blob"></div>
+        <div class="absolute top-[-10%] right-[-10%] w-96 h-96 bg-yellow-300 dark:bg-yellow-900 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-96 h-96 bg-pink-300 dark:bg-pink-900 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <div class="w-full max-w-3xl flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
+            KeyGen Portal
+        </h1>
+        <button id="themeToggle" class="p-2 rounded-full glass-button focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Toggle Theme">
+            <svg id="sunIcon" class="hidden w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <svg id="moonIcon" class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        </button>
+    </div>
+
+    <main class="w-full max-w-3xl glass-panel rounded-2xl p-6 sm:p-10 relative overflow-hidden">
+        
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-semibold mb-2">Get Your Access Key</h2>
+            <p class="text-slate-600 dark:text-gray-400 text-sm">
+                Complete the 2 required tasks below to generate your unique access key.
+            </p>
+        </div>
+
+        <div class="mb-8">
+            <div class="flex justify-between text-sm font-medium mb-2">
+                <span>Progress</span>
+                <span id="progressText">0 / 2 Tasks</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+                <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2.5 rounded-full w-0 transition-all duration-500 ease-out"></div>
+            </div>
+        </div>
+
+        <!-- Task Section -->
+        <div id="tasksSection" class="space-y-6">
+            <!-- Task 1 -->
+            <div class="glass-panel p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4 w-full sm:w-auto">
+                    <div id="task1Icon" class="w-10 h-10 rounded-full bg-slate-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 transition-colors">
+                        <span class="text-lg font-bold text-slate-500 dark:text-gray-400">1</span>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg">Complete Task 1</h3>
+                        <p class="text-sm text-slate-500 dark:text-gray-400">Watch a video and subscribe</p>
+                    </div>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button id="btnStartTask1" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-lg shadow-indigo-500/30">
+                        Start Task
+                    </button>
+                    <button id="btnVerifyTask1" class="hidden w-full sm:w-auto px-4 py-2 glass-button text-indigo-600 dark:text-indigo-400 rounded-lg font-medium">
+                        I've completed this
+                    </button>
+                </div>
+            </div>
+
+            <!-- Task 2 -->
+            <div class="glass-panel p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4 w-full sm:w-auto">
+                    <div id="task2Icon" class="w-10 h-10 rounded-full bg-slate-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 transition-colors">
+                        <span class="text-lg font-bold text-slate-500 dark:text-gray-400">2</span>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg">Complete Task 2</h3>
+                        <p class="text-sm text-slate-500 dark:text-gray-400">View sponsored content</p>
+                    </div>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button id="btnStartTask2" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-lg shadow-indigo-500/30">
+                        Start Task
+                    </button>
+                    <button id="btnVerifyTask2" class="hidden w-full sm:w-auto px-4 py-2 glass-button text-indigo-600 dark:text-indigo-400 rounded-lg font-medium">
+                        I've completed this
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="loadingSection" class="hidden flex-col items-center justify-center py-10">
+            <svg class="animate-spin h-10 w-10 text-indigo-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-lg font-medium animate-pulse">Fetching secure key...</p>
+        </div>
+
+        <div id="resultSection" class="hidden mt-8">
+            <div class="glass-panel p-6 rounded-xl border border-green-500/30 bg-green-50/50 dark:bg-green-900/20 text-center">
+                <h3 id="resultTitle" class="text-green-600 dark:text-green-400 font-semibold mb-2 flex items-center justify-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Key Generated Successfully!
+                </h3>
+                <p id="existingKeyWarning" class="hidden text-sm text-amber-600 dark:text-amber-400 mb-4 font-medium"></p>
+                
+                <div class="mb-6 relative group">
+                    <div class="font-mono text-2xl sm:text-3xl font-bold tracking-wider py-4 px-2 bg-white/50 dark:bg-black/30 rounded-lg select-all" id="generatedKeyDisplay">
+                        XXXX-XXXX-XXXX-XXXX
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-center gap-3 mb-2">
+                    <button id="btnCopyKey" class="flex items-center justify-center gap-2 px-4 py-2 glass-button rounded-lg font-medium">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        Copy Key
+                    </button>
+                    <button id="btnDownloadKey" class="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Download key.txt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <section class="w-full max-w-3xl mt-8">
+        <div class="glass-panel rounded-2xl p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold">Key History</h3>
+            </div>
+            
+            <div id="historyList" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                <p id="emptyHistoryMsg" class="text-center text-slate-500 dark:text-gray-400 py-4 italic">
+                    No active keys generated yet.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        const CONFIG = {
+            TASK1_URL: 'https://youtube.com/watch?v=eDgKtZKmbao&si=xo_iK0ZUoc89umSh',
+            TASK2_URL: 'https://cdn.calivoraes.com/tml/FourDrawBoxIOS.html?v=2608031625-3#/?did=a01b8b82-3369-4c2e-89a3-da4452dcee5d&d.adPlat=1&lang=en&reqId=139da36c63f34a2b9ea864ea969851e3&tid=11186&jsv=2607301600&os=1&d.algId=24&d.rankab=2&uid=a01b8b82-3369-4c2e-89a3-da4452dcee5d&d.ptkid=1109256129738978639&pid=22565&appk=inkCK2xuYq5rGzBJgobchjwwdsaS0FWj&dtype=1&d.psubid=10491578&d.pst=1',
+            KEYS_URL: 'https://raw.githubusercontent.com/gaphop123/GaphopUI/refs/heads/main/Codes.txt',
+            VERIFY_DELAY: 1500,
+            TASK_TIMER_SECONDS: 1,
+            EXPIRATION_HOURS: 24 // 24-Hour lifetime for active keys
+        };
+
+        const state = {
+            task1Status: 'pending',
+            task2Status: 'pending',
+            currentKey: null,
+            history: [],
+            task1Timer: null,
+            task2Timer: null
+        };
+
+        const els = {
+            themeToggle: document.getElementById('themeToggle'),
+            sunIcon: document.getElementById('sunIcon'),
+            moonIcon: document.getElementById('moonIcon'),
+            
+            progressText: document.getElementById('progressText'),
+            progressBar: document.getElementById('progressBar'),
+            
+            tasksSection: document.getElementById('tasksSection'),
+            loadingSection: document.getElementById('loadingSection'),
+            resultSection: document.getElementById('resultSection'),
+            
+            btnStartTask1: document.getElementById('btnStartTask1'),
+            btnVerifyTask1: document.getElementById('btnVerifyTask1'),
+            task1Icon: document.getElementById('task1Icon'),
+            
+            btnStartTask2: document.getElementById('btnStartTask2'),
+            btnVerifyTask2: document.getElementById('btnVerifyTask2'),
+            task2Icon: document.getElementById('task2Icon'),
+            
+            generatedKeyDisplay: document.getElementById('generatedKeyDisplay'),
+            btnCopyKey: document.getElementById('btnCopyKey'),
+            btnDownloadKey: document.getElementById('btnDownloadKey'),
+            
+            resultTitle: document.getElementById('resultTitle'),
+            existingKeyWarning: document.getElementById('existingKeyWarning'),
+            
+            historyList: document.getElementById('historyList'),
+            emptyHistoryMsg: document.getElementById('emptyHistoryMsg'),
+            
+            toastContainer: document.getElementById('toastContainer')
+        };
+
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-blue-500');
+            
+            toast.className = `toast-enter flex items-center p-4 mb-2 text-white rounded-lg shadow-lg ${bgColor} glass-panel border-none`;
+            toast.innerHTML = `<div class="ml-3 text-sm font-normal">${escapeHTML(message)}</div>`;
+            
+            els.toastContainer.appendChild(toast);
+            
+            requestAnimationFrame(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-enter-active');
+            });
+
+            setTimeout(() => {
+                toast.classList.remove('toast-enter-active');
+                toast.classList.add('toast-exit-active');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, 3000);
+        }
+
+        function copyToClipboard(text, successMessage) {
+            try {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "0";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (successful) showToast(successMessage);
+                else showToast('Failed to copy', 'error');
+            } catch (err) {
+                console.error('Copy failed', err);
+                showToast('Failed to copy', 'error');
+            }
+        }
+
+        function downloadTextFile(filename, text) {
+            const element = document.createElement('a');
+            const file = new Blob([text], {type: 'text/plain'});
+            element.href = URL.createObjectURL(file);
+            element.download = filename;
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            showToast('Download started');
+        }
+
+        function updateProgress() {
+            let completedCount = 0;
+            if (state.task1Status === 'completed') completedCount++;
+            if (state.task2Status === 'completed') completedCount++;
+            
+            els.progressText.textContent = `${completedCount} / 2 Tasks`;
+            els.progressBar.style.width = `${(completedCount / 2) * 100}%`;
+
+            if (completedCount === 2) {
+                initiateKeyGeneration();
+            }
+        }
+
+        function markTaskClicked(taskNum) {
+            let timeLeft = CONFIG.TASK_TIMER_SECONDS;
+            const btnVerify = taskNum === 1 ? els.btnVerifyTask1 : els.btnVerifyTask2;
+            const btnStart = taskNum === 1 ? els.btnStartTask1 : els.btnStartTask2;
+            const timerKey = taskNum === 1 ? 'task1Timer' : 'task2Timer';
+
+            if (taskNum === 1) state.task1Status = 'clicked';
+            else state.task2Status = 'clicked';
+
+            btnStart.classList.add('hidden');
+            btnVerify.classList.remove('hidden');
+            btnVerify.disabled = true;
+            btnVerify.textContent = `Please wait (${timeLeft}s)...`;
+
+            if (state[timerKey]) clearInterval(state[timerKey]);
+
+            state[timerKey] = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    btnVerify.textContent = `Please wait (${timeLeft}s)...`;
+                } else {
+                    clearInterval(state[timerKey]);
+                    state[timerKey] = null;
+                    btnVerify.disabled = false;
+                    btnVerify.textContent = "I've completed this";
+                    showToast(`Task ${taskNum} is ready to verify!`, 'info');
+                }
+            }, 1000);
+        }
+
+        function verifyTask(taskNum, btnEl, iconEl) {
+            btnEl.disabled = true;
+            btnEl.innerHTML = `<svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+
+            setTimeout(() => {
+                if (taskNum === 1) state.task1Status = 'completed';
+                else state.task2Status = 'completed';
+
+                btnEl.innerHTML = `Completed <svg class="w-4 h-4 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+                btnEl.classList.remove('text-indigo-600', 'dark:text-indigo-400');
+                btnEl.classList.add('text-green-600', 'dark:text-green-400', 'bg-green-100', 'dark:bg-green-900/30');
+                
+                iconEl.classList.remove('bg-slate-200', 'dark:bg-gray-700', 'text-slate-500');
+                iconEl.classList.add('bg-green-500', 'text-white');
+                iconEl.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+                
+                showToast(`Task ${taskNum} verified!`);
+                updateProgress();
+            }, CONFIG.VERIFY_DELAY);
+        }
+
+        function initiateKeyGeneration() {
+            els.tasksSection.classList.add('hidden');
+            els.loadingSection.classList.remove('hidden');
+            els.loadingSection.classList.add('flex');
+
+            setTimeout(async () => {
+                try {
+                    const response = await fetch(CONFIG.KEYS_URL);
+                    if (!response.ok) throw new Error('Failed to fetch keys.');
+                    
+                    const text = await response.text();
+                    const keysList = text.split('\n').map(k => k.trim()).filter(k => k.length > 0);
+                    
+                    if (keysList.length === 0) throw new Error('No keys available.');
+                    
+                    const randomIndex = Math.floor(Math.random() * keysList.length);
+                    state.currentKey = keysList[randomIndex];
+                    
+                    els.generatedKeyDisplay.textContent = state.currentKey;
+                    
+                    els.resultTitle.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Key Generated Successfully!`;
+                    els.resultTitle.className = "text-green-600 dark:text-green-400 font-semibold mb-2 flex items-center justify-center gap-2";
+                    els.existingKeyWarning.classList.add('hidden');
+                    showToast('Key generated successfully!', 'success');
+                    
+                    saveToHistory(state.currentKey);
+                    
+                    els.loadingSection.classList.add('hidden');
+                    els.loadingSection.classList.remove('flex');
+                    els.resultSection.classList.remove('hidden');
+                } catch (error) {
+                    console.error('API Error:', error);
+                    showToast('Error! Failed to load key list.', 'error');
+                    els.loadingSection.classList.add('hidden');
+                    els.loadingSection.classList.remove('flex');
+                    els.tasksSection.classList.remove('hidden');
+                    updateProgress();
+                }
+            }, 1000);
+        }
+
+        function resetApp() {
+            if (state.task1Timer) clearInterval(state.task1Timer);
+            if (state.task2Timer) clearInterval(state.task2Timer);
+            state.task1Timer = null;
+            state.task2Timer = null;
+
+            state.task1Status = 'pending';
+            state.task2Status = 'pending';
+            state.currentKey = null;
+
+            els.progressText.textContent = `0 / 2 Tasks`;
+            els.progressBar.style.width = `0%`;
+            
+            els.existingKeyWarning.classList.add('hidden');
+            els.resultSection.classList.add('hidden');
+            els.tasksSection.classList.remove('hidden');
+            
+            els.btnStartTask1.classList.remove('hidden');
+            els.btnVerifyTask1.classList.add('hidden');
+            els.btnVerifyTask1.disabled = false;
+            els.btnVerifyTask1.textContent = "I've completed this";
+            els.btnVerifyTask1.className = "hidden w-full sm:w-auto px-4 py-2 glass-button text-indigo-600 dark:text-indigo-400 rounded-lg font-medium";
+            els.task1Icon.className = "w-10 h-10 rounded-full bg-slate-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 transition-colors text-slate-500 dark:text-gray-400";
+            els.task1Icon.innerHTML = `<span class="text-lg font-bold">1</span>`;
+            
+            els.btnStartTask2.classList.remove('hidden');
+            els.btnVerifyTask2.classList.add('hidden');
+            els.btnVerifyTask2.disabled = false;
+            els.btnVerifyTask2.textContent = "I've completed this";
+            els.btnVerifyTask2.className = "hidden w-full sm:w-auto px-4 py-2 glass-button text-indigo-600 dark:text-indigo-400 rounded-lg font-medium";
+            els.task2Icon.className = "w-10 h-10 rounded-full bg-slate-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 transition-colors text-slate-500 dark:text-gray-400";
+            els.task2Icon.innerHTML = `<span class="text-lg font-bold">2</span>`;
+        }
+
+        function loadHistory() {
+            try {
+                const stored = localStorage.getItem('keygen_history');
+                if (stored) {
+                    state.history = JSON.parse(stored);
+                }
+            } catch (e) {
+                console.error('Failed to load history', e);
+            }
+            cleanExpiredHistory();
+            renderHistory();
+        }
+
+        function checkExistingActiveKey() {
+            cleanExpiredHistory();
+            if (state.history.length > 0) {
+                const activeKeyObj = state.history[0];
+                state.currentKey = activeKeyObj.key;
+                
+                els.tasksSection.classList.add('hidden');
+                
+                els.generatedKeyDisplay.textContent = state.currentKey;
+                els.resultTitle.innerHTML = `<svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> Active Key Found!`;
+                els.resultTitle.className = "text-amber-600 dark:text-amber-400 font-semibold mb-2 flex items-center justify-center gap-2";
+                
+                const remainingText = getRemainingTimeString(activeKeyObj.timestamp);
+                els.existingKeyWarning.textContent = `You already have an active key (${remainingText}). Tasks are hidden until your key expires after 24 hours.`;
+                els.existingKeyWarning.classList.remove('hidden');
+                
+                els.resultSection.classList.remove('hidden');
+            }
+        }
+
+        function cleanExpiredHistory() {
+            const now = Date.now();
+            const maxAge = CONFIG.EXPIRATION_HOURS * 60 * 60 * 1000;
+            const initialLength = state.history.length;
+            
+            state.history = state.history.filter(item => {
+                const itemTime = new Date(item.timestamp).getTime();
+                return (now - itemTime) < maxAge;
+            });
+
+            if (state.history.length !== initialLength) {
+                localStorage.setItem('keygen_history', JSON.stringify(state.history));
+            }
+        }
+
+        function getRemainingTimeString(timestamp) {
+            const createdTime = new Date(timestamp).getTime();
+            const now = Date.now();
+            const maxAge = CONFIG.EXPIRATION_HOURS * 60 * 60 * 1000;
+            
+            // Tinh thoi gian da troi qua tu luc tao key
+            const elapsedTime = now - createdTime;
+            // Tinh thoi gian con lai
+            const remaining = maxAge - elapsedTime;
+
+            if (remaining <= 0) return 'Expired';
+
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+            return `${hours}h ${minutes}m ${seconds}s left`;
+        }
+
+        function updateActiveKeyBanner() {
+            if (state.history.length > 0) {
+                const activeKeyObj = state.history[0];
+                const remainingText = getRemainingTimeString(activeKeyObj.timestamp);
+                
+                if (remainingText === 'Expired') {
+                    resetApp();
+                    showToast('Your key has expired. You can now complete tasks for a new key.', 'info');
+                } else {
+                    els.existingKeyWarning.textContent = `You already have an active key (${remainingText}). Tasks are hidden until your key expires after 24 hours.`;
+                }
+            }
+        }
+
+        function checkExistingActiveKey() {
+            cleanExpiredHistory();
+            if (state.history.length > 0) {
+                const activeKeyObj = state.history[0];
+                state.currentKey = activeKeyObj.key;
+                
+                els.tasksSection.classList.add('hidden');
+                
+                els.generatedKeyDisplay.textContent = state.currentKey;
+                els.resultTitle.innerHTML = `<svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> Active Key Found!`;
+                els.resultTitle.className = "text-amber-600 dark:text-amber-400 font-semibold mb-2 flex items-center justify-center gap-2";
+                
+                updateActiveKeyBanner();
+                els.existingKeyWarning.classList.remove('hidden');
+                
+                els.resultSection.classList.remove('hidden');
+            }
+        }
+
+        function saveToHistory(key) {
+            const entry = {
+                key: key,
+                timestamp: new Date().toISOString()
+            };
+            state.history.unshift(entry);
+            
+            if(state.history.length > 50) state.history.pop();
+            
+            localStorage.setItem('keygen_history', JSON.stringify(state.history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            cleanExpiredHistory();
+            els.historyList.innerHTML = '';
+            
+            if (state.history.length === 0) {
+                els.emptyHistoryMsg.classList.remove('hidden');
+                return;
+            }
+            
+            els.emptyHistoryMsg.classList.add('hidden');
+            
+            state.history.forEach(item => {
+                const date = new Date(item.timestamp).toLocaleString();
+                const remainingText = getRemainingTimeString(item.timestamp);
+                const div = document.createElement('div');
+                div.className = "glass-panel p-3 rounded-lg text-sm flex justify-between items-center";
+                div.innerHTML = `
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono font-bold text-slate-800 dark:text-gray-200">${escapeHTML(item.key)}</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 font-medium">${escapeHTML(remainingText)}</span>
+                        </div>
+                        <div class="text-xs text-slate-500 dark:text-gray-400 mt-1">${escapeHTML(date)}</div>
+                    </div>
+                    <button class="p-2 glass-button rounded-md hover:bg-slate-200 dark:hover:bg-gray-700" onclick="copyToClipboard('${escapeHTML(item.key)}', 'Historical key copied!')" title="Copy Key">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    </button>
+                `;
+                els.historyList.appendChild(div);
+            });
+        }
+
+        function initTheme() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                els.sunIcon.classList.remove('hidden');
+                els.moonIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                els.sunIcon.classList.add('hidden');
+                els.moonIcon.classList.remove('hidden');
+            }
+        }
+
+        els.themeToggle.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+                els.sunIcon.classList.add('hidden');
+                els.moonIcon.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+                els.sunIcon.classList.remove('hidden');
+                els.moonIcon.classList.add('hidden');
+            }
+        });
+
+        els.btnStartTask1.addEventListener('click', () => {
+            window.open(CONFIG.TASK1_URL, '_blank');
+            markTaskClicked(1);
+        });
+        els.btnVerifyTask1.addEventListener('click', () => verifyTask(1, els.btnVerifyTask1, els.task1Icon));
+
+        els.btnStartTask2.addEventListener('click', () => {
+            window.open(CONFIG.TASK2_URL, '_blank');
+            markTaskClicked(2);
+        });
+        els.btnVerifyTask2.addEventListener('click', () => verifyTask(2, els.btnVerifyTask2, els.task2Icon));
+
+        els.btnCopyKey.addEventListener('click', () => copyToClipboard(state.currentKey, 'Key copied to clipboard!'));
+        els.btnDownloadKey.addEventListener('click', () => {
+            const textContent = `Key: ${state.currentKey}\nTimestamp: ${new Date().toISOString()}`;
+            downloadTextFile('key.txt', textContent);
+        });
+
+        window.onload = () => {
+            initTheme();
+            loadHistory();
+            checkExistingActiveKey();
+
+            setInterval(() => {
+                cleanExpiredHistory();
+                
+                if (state.history.length > 0 && !els.resultSection.classList.contains('hidden')) {
+                    updateActiveKeyBanner();
+                }
+
+                renderHistory();
+
+                if (state.history.length === 0 && !els.resultSection.classList.contains('hidden') && els.tasksSection.classList.contains('hidden')) {
+                    resetApp();
+                    showToast('Your key has expired. You can now complete tasks for a new key.', 'info');
+                }
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
