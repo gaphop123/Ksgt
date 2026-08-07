@@ -1,0 +1,21 @@
+name: Write Generated Key to key.txt
+
+on:
+  repository_dispatch:
+    types: [save_key]
+
+jobs:
+  append_key:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Append Key to key.txt
+        run: |
+          echo "${{ github.event.client_payload.key }}" >> key.txt
+          git config --global user.name "GitHub Actions KeyGen"
+          git config --global user.email "actions@github.com"
+          git add key.txt
+          git commit -m "Auto-generated key: ${{ github.event.client_payload.key }}" || exit 0
+          git push
